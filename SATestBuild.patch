@@ -1,0 +1,65 @@
+Index: SATestBuild.py
+===================================================================
+--- SATestBuild.py
++++ SATestBuild.py
+@@ -176,14 +176,12 @@ Checkers = ",".join([
+     "cplusplus.NewDeleteLeaks",
+     "core",
+     "cplusplus",
+-    "deadcode",
+-    "security",
+     "unix",
+     "osx",
+     "nullability"
+ ])
+ 
+-Verbose = 0
++Verbose = 1
+ 
+ ###############################################################################
+ # Test harness logic.
+@@ -274,14 +272,16 @@ def runScanBuild(Dir, SBOutputDir, PBuildLogFile):
+     SBCwd = os.path.join(Dir, PatchedSourceDirName)
+ 
+     SBOptions = "--use-analyzer '%s' " % Clang
+-    SBOptions += "-plist-html -o '%s' " % SBOutputDir
++    SBOptions += "-plist -o '%s' " % SBOutputDir
+     SBOptions += "-enable-checker " + AllCheckers + " "
++    SBOptions += "-disable-checker deadcode "
+     SBOptions += "--keep-empty "
+     AnalyzerConfig = [
+         ("stable-report-filename", "true"),
+         ("serialize-stats", "true"),
++        ("crosscheck-with-z3", "false")
+     ]
+-
++ 
+     SBOptions += "-analyzer-config '%s' " % (
+         ",".join("%s=%s" % (key, value) for (key, value) in AnalyzerConfig))
+ 
+@@ -436,7 +436,6 @@ def buildProject(Dir, SBOutputDir, ProjectBuildMode, IsReferenceBuild):
+             runAnalyzePreprocessed(Dir, SBOutputDir, ProjectBuildMode)
+ 
+         if IsReferenceBuild:
+-            runCleanupScript(Dir, PBuildLogFile)
+             normalizeReferenceResults(Dir, SBOutputDir, ProjectBuildMode)
+ 
+     Local.stdout.write("Build complete (time: %.2f). "
+@@ -589,7 +588,7 @@ def runCmpResults(Dir, Strictness=0):
+ 
+         PatchedSourceDirPath = os.path.join(Dir, PatchedSourceDirName)
+         Opts, Args = CmpRuns.generate_option_parser().parse_args(
+-            ["--rootA", "", "--rootB", PatchedSourceDirPath])
++            ["--rootA", "", "--rootB", PatchedSourceDirPath, "--show-stats"])
+         # Scan the results, delete empty plist files.
+         NumDiffs, ReportsInRef, ReportsInNew = \
+             CmpRuns.dumpScanBuildResultsDiff(RefDir, NewDir, Opts,
+@@ -680,7 +679,6 @@ def testProject(ID, ProjectBuildMode, IsReferenceBuild=False, Strictness=0):
+     checkBuild(SBOutputDir)
+ 
+     if IsReferenceBuild:
+-        cleanupReferenceResults(SBOutputDir)
+         TestsPassed = True
+     else:
+         TestsPassed = runCmpResults(Dir, Strictness)
+
