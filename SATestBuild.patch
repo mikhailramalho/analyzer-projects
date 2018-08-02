@@ -25,26 +25,18 @@ Index: SATestBuild.py
 -    SBOptions += "-plist-html -o '%s' " % SBOutputDir
 +    SBOptions += "-plist -o '%s' " % SBOutputDir
      SBOptions += "-enable-checker " + AllCheckers + " "
+-    SBOptions += "--keep-empty "
 +    SBOptions += "-disable-checker deadcode "
-     SBOptions += "--keep-empty "
++    SBOptions += "--keep-empty --keep-going "
      AnalyzerConfig = [
          ("stable-report-filename", "true"),
          ("serialize-stats", "true"),
 +        ("crosscheck-with-z3", "false")
      ]
--
-+ 
+
      SBOptions += "-analyzer-config '%s' " % (
          ",".join("%s=%s" % (key, value) for (key, value) in AnalyzerConfig))
  
-@@ -436,7 +436,6 @@ def buildProject(Dir, SBOutputDir, ProjectBuildMode, IsReferenceBuild):
-             runAnalyzePreprocessed(Dir, SBOutputDir, ProjectBuildMode)
- 
-         if IsReferenceBuild:
--            runCleanupScript(Dir, PBuildLogFile)
-             normalizeReferenceResults(Dir, SBOutputDir, ProjectBuildMode)
- 
-     Local.stdout.write("Build complete (time: %.2f). "
 @@ -589,7 +588,7 @@ def runCmpResults(Dir, Strictness=0):
  
          PatchedSourceDirPath = os.path.join(Dir, PatchedSourceDirName)
