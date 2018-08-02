@@ -36,6 +36,18 @@ Index: CachedSource/makedefs/MakeInc.def
  	-Wpointer-arith \
  	-Wreturn-type \
  	-Wcast-qual \
+Index: CachedSource/osfmk/i386/cpu_topology.c
+===================================================================
+--- CachedSource/osfmk/i386/cpu_topology.c
++++ CachedSource/osfmk/i386/cpu_topology.c
+@@ -26,6 +26,7 @@
+  * @APPLE_OSREFERENCE_LICENSE_HEADER_END@
+  */
+
++#include <stddef.h>
+ #include <mach/machine.h>
+ #include <mach/processor.h>
+ #include <kern/kalloc.h>
 Index: CachedSource/osfmk/vm/vm_object.h
 ===================================================================
 --- CachedSource/osfmk/vm/vm_object.h
